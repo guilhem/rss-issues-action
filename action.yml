@@ -1,0 +1,20 @@
+name: "rss-issues"
+author: "Guilhem Lettron"
+description: "Create Issues based on RSS"
+inputs:
+  repo-token:
+    description: "The GITHUB_TOKEN secret"
+  feed:
+    description: "URL of the rss"
+  prefix:
+    description: "Prefix added to issues"
+  lastTime:
+    description: "limit RSS items to this time"
+  labels:
+    description: "Labels to add, comma separated"
+outputs:
+  issues:
+    description: "issues id, comma separated"
+runs:
+  using: "docker"
+  image: "Dockerfile"
