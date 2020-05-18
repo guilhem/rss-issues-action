@@ -22,7 +22,11 @@ Limit items date.
 
 ### `labels`
 
-"Labels to add, comma separated".
+Labels to add, comma separated.
+
+### `dry-run`
+
+Log issue creation but do nothing
 
 ## Outputs
 
