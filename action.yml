@@ -1,6 +1,9 @@
 name: "rss-issues"
 author: "Guilhem Lettron"
 description: "Create Issues based on RSS"
+branding:
+  icon: "rss"
+  color: "orange"
 inputs:
   repo-token:
     description: "The GITHUB_TOKEN secret"
