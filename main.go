@@ -71,21 +71,28 @@ func main() {
 	// Iterate
 	for _, item := range feed.Items {
 		title := strings.Join([]string{gha.GetInput("prefix"), item.Title}, " ")
-		gha.Debug(fmt.Sprintf("Issue %s at %s", title, item.UpdatedParsed), ghaLogOption)
+		gha.Debug(fmt.Sprintf("Issue '%s'", title), ghaLogOption)
 
-		if len(item.Updated) != 0 {
-			if item.UpdatedParsed.Before(limitTime) {
-				gha.Debug("Item before limit", ghaLogOption)
-				continue
-			}
+		var t *time.Time
+		if item.UpdatedParsed != nil {
+			t = item.UpdatedParsed
+			gha.Debug("Use 'updated' field", ghaLogOption)
+		} else if item.PublishedParsed != nil {
+			t = item.PublishedParsed
+			gha.Debug("Use 'published' field", ghaLogOption)
 		} else {
-			gha.Warning(fmt.Sprintf("No 'updated' field on item %s", item.Title), ghaLogOption)
+			gha.Warning("No timed field", ghaLogOption)
+		}
+
+		if t != nil && t.Before(limitTime) {
+			gha.Debug(fmt.Sprintf("Item date '%s' is before limit", t), ghaLogOption)
+			continue
 		}
 
 		if issue := funk.Find(issues, func(x *github.Issue) bool {
 			return *x.Title == title
 		}); issue != nil {
-			gha.Warning(fmt.Sprintf("Issue %s already exists", title), ghaLogOption)
+			gha.Warning("Issue already exists", ghaLogOption)
 			continue
 		}
 
