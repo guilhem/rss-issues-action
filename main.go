@@ -100,7 +100,12 @@ func main() {
 
 		// Issue Content
 
-		markdown, err := converter.ConvertString(item.Content)
+		content := item.Content
+		if content == "" {
+			content = item.Description
+		}
+
+		markdown, err := converter.ConvertString(content)
 		if err != nil {
 			gha.Error(fmt.Sprintf("Fail to convert HTML to markdown: '%s'", err), ghaLogOption)
 			continue
