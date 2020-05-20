@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/google/go-github/v31/github"
@@ -96,15 +98,42 @@ func main() {
 			continue
 		}
 
+		// Issue Content
+
 		markdown, err := converter.ConvertString(item.Content)
 		if err != nil {
 			gha.Error(fmt.Sprintf("Fail to convert HTML to markdown: '%s'", err), ghaLogOption)
 			continue
 		}
 
+		// Execute the template with a map as context
+		context := map[string]string{
+			"Link":    item.Link,
+			"Content": markdown,
+		}
+
+		const issue = `
+{{if .Link}}
+[{{ .Link }}]({{ .Link }})
+
+{{end}}
+{{if .Content}}
+{{ .Content }}
+{{end}}
+`
+		var tpl bytes.Buffer
+		if err := template.Must(template.New("issue").Parse(issue)).Execute(&tpl, context); err != nil {
+			gha.Warning(fmt.Sprintf("Cannot render issue: '%s'", err), ghaLogOption)
+			continue
+		}
+
+		body := tpl.String()
+
+		// Create Issue
+
 		issueRequest := &github.IssueRequest{
 			Title:  &title,
-			Body:   &markdown,
+			Body:   &body,
 			Labels: &labels,
 		}
 
