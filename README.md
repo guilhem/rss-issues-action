@@ -28,6 +28,10 @@ Labels to add, comma separated.
 
 Log issue creation but do nothing
 
+### `characterLimit`
+
+Limit size of issue content
+
 ## Outputs
 
 ### `issues`
