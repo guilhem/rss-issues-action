@@ -84,7 +84,7 @@ func main() {
 	}
 	gha.Debug(fmt.Sprintf("%d issues", len(issues)), ghaLogOption)
 
-	var createdIssues []string
+	var createdIssues []*github.IssueRequest
 
 	// Iterate
 	for _, item := range feed.Items {
@@ -134,25 +134,40 @@ func main() {
 
 		body := tpl.String()
 
-		// Create Issue
+		// Default to creating an issue per item
+		// Create first issue if aggregate
+		if aggregate, err := strconv.ParseBool(gha.GetInput("aggregate")); err != nil || !aggregate || len(createdIssues) == 0 {
+			// Create Issue
 
-		issueRequest := &github.IssueRequest{
-			Title:  &title,
-			Body:   &body,
-			Labels: &labels,
+			issueRequest := &github.IssueRequest{
+				Title:  &title,
+				Body:   &body,
+				Labels: &labels,
+			}
+			createdIssues = append(createdIssues, issueRequest)
+		} else {
+			title = strings.Join([]string{gha.GetInput("prefix"), time.Now().Format(time.RFC822)}, " ")
+			createdIssues[0].Title = &title
+
+			body = fmt.Sprintf("%s\n\n%s", *createdIssues[0].Body, body)
+			createdIssues[0].Body = &body
 		}
 
+	}
+
+	for _, issueRequest := range createdIssues {
 		if dr, err := strconv.ParseBool(gha.GetInput("dry-run")); err != nil || !dr {
+
 			_, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
 			if err != nil {
 				gha.Warning(fmt.Sprintf("Fail create issue %s: %s", *issueRequest.Title, err), ghaLogOption)
 				continue
 			}
+
 		} else {
 			gha.Debug(fmt.Sprintf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body), ghaLogOption)
 		}
-		createdIssues = append(createdIssues, *issueRequest.Title)
 	}
 
-	gha.SetOutput("issues", strings.Join(createdIssues, ","))
+	// gha.SetOutput("issues", strings.Join(createdIssues, ","))
 }
