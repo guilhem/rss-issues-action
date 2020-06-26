@@ -121,7 +121,7 @@ func main() {
 			}
 			if len(markdown) > cl {
 				markdown = markdown[:cl] + "…"
-				markdown += "\nWould You Like to Know More?"
+				markdown += "\n\n---\n## Would you like to know more?\nRead the full article on the following website:"
 			}
 		}
 
@@ -137,7 +137,7 @@ func main() {
 {{end}}
 {{if .Link}}
 
-[{{ .Link }}]({{ .Link }})
+<{{ .Link }}>
 {{end}}
 `
 		var tpl bytes.Buffer
