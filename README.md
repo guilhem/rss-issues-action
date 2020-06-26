@@ -32,6 +32,10 @@ Log issue creation but do nothing
 
 Aggregate all items in a single issue
 
+### `characterLimit`
+
+Limit size of issue content
+
 ## Outputs
 
 ### `issues`
@@ -67,6 +71,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           feed: "https://cloud.google.com/feeds/kubernetes-engine-release-notes.xml"
           prefix: "[GKE]"
+          characterLimit: "255"
           dry-run: "false"
           lastTime: "92h"
           labels: "liens/Kubernetes"

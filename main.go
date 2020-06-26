@@ -111,6 +111,20 @@ func main() {
 			continue
 		}
 
+		// truncate if characterLimit >0
+		characterLimit := gha.GetInput("characterLimit")
+		if characterLimit != "" {
+			cl, err := strconv.Atoi(characterLimit)
+			if err != nil {
+				gha.Error(fmt.Sprintf("fail to convert 'characterLimit': '%s'", err), ghaLogOption)
+				continue
+			}
+			if len(markdown) > cl {
+				markdown = markdown[:cl] + "…"
+				markdown += "\n\n---\n## Would you like to know more?\nRead the full article on the following website:"
+			}
+		}
+
 		// Execute the template with a map as context
 		context := map[string]string{
 			"Link":    item.Link,
@@ -118,12 +132,12 @@ func main() {
 		}
 
 		const issue = `
-{{if .Link}}
-[{{ .Link }}]({{ .Link }})
-
-{{end}}
 {{if .Content}}
 {{ .Content }}
+{{end}}
+{{if .Link}}
+
+<{{ .Link }}>
 {{end}}
 `
 		var tpl bytes.Buffer

@@ -19,6 +19,8 @@ inputs:
     description: "Log issue creation but do nothing"
   aggregate:
     description: "Aggregate all items in a single issue"
+  characterLimit:
+    description: "Limit size of issue content"
 outputs:
   issues:
     description: "issues id, comma separated"
