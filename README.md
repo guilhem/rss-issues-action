@@ -66,7 +66,7 @@ jobs:
   gke-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: guilhem/rss-issues-action@0.0.1
+      - uses: guilhem/rss-issues-action@0.2.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           feed: "https://cloud.google.com/feeds/kubernetes-engine-release-notes.xml"
