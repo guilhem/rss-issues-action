@@ -28,6 +28,10 @@ Labels to add, comma separated.
 
 Log issue creation but do nothing
 
+### `aggregate`
+
+Aggregate all items in a single issue
+
 ### `characterLimit`
 
 Limit size of issue content

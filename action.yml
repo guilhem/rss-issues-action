@@ -17,6 +17,8 @@ inputs:
     description: "Labels to add, comma separated"
   dry-run:
     description: "Log issue creation but do nothing"
+  aggregate:
+    description: "Aggregate all items in a single issue"
   characterLimit:
     description: "Limit size of issue content"
 outputs:
