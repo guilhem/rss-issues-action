@@ -10,58 +10,69 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/google/go-github/v31/github"
+	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
 
 	funk "github.com/thoas/go-funk"
 
 	"github.com/mmcdole/gofeed"
 
-	gha "github.com/haya14busa/go-actions-toolkit/core"
+	gha "github.com/sethvargo/go-githubactions"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
+const (
+	lastTimeInput  = "lastTime"
+	labelsInput    = "labels"
+	repoTokenInput = "repo-token"
+	feedInput      = "feed"
+	prefixInput    = "prefix"
+	aggregateInput = "aggragate"
+	dryRunInput    = "dry-run"
+)
+
 func main() {
-	ghaLogOption := &gha.LogOption{File: "main.go"}
+	a := gha.New()
+	a.AddPath("main.go")
 
 	// Parse repository in form owner/name
 	repo := strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
 
 	// Parse limit time option
 	var limitTime time.Time
-	if d, err := time.ParseDuration(gha.GetInput("lastTime")); err == nil {
+	if d, err := time.ParseDuration(a.GetInput(lastTimeInput)); err == nil {
 		// Make duration negative
 		if d > 0 {
 			d = -d
 		}
 		limitTime = time.Now().Add(d)
 	} else {
-		gha.Debug(fmt.Sprintf("Fail to parse last time %s", gha.GetInput("lastTime")), ghaLogOption)
+		a.Debugf("Fail to parse last time %s", a.GetInput(lastTimeInput))
 	}
-	gha.Debug(fmt.Sprintf("limitTime %s", limitTime), ghaLogOption)
+	a.Debugf("limitTime %s", limitTime)
 
 	// Parse Labels
-	labels := strings.Split(gha.GetInput("labels"), ",")
-	gha.Debug(fmt.Sprintf("labels %v", labels), ghaLogOption)
+	labels := strings.Split(a.GetInput(labelsInput), ",")
+	a.Debugf("labels %v", labels)
 
 	ctx := context.Background()
 
 	// Instanciate GitHub client
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: gha.GetInput("repo-token")},
+		&oauth2.Token{AccessToken: a.GetInput(repoTokenInput)},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
 	// Instanciate feed parser
 	fp := gofeed.NewParser()
-	feed, err := fp.ParseURLWithContext(gha.GetInput("feed"), ctx)
+	feed, err := fp.ParseURLWithContext(a.GetInput(feedInput), ctx)
 	if err != nil {
-		gha.Error(fmt.Sprintf("Cannot parse feed '%s': '%s'", gha.GetInput("feed"), err), ghaLogOption)
+		a.Errorf("Cannot parse feed '%s': '%s'", a.GetInput(feedInput), err)
 		os.Exit(1)
 	}
-	gha.Info(feed.Title)
+	a.Infof("%s", feed.Title)
 
 	// Instanciate HTML to markdown
 	converter := md.NewConverter("", true, nil)
@@ -79,22 +90,21 @@ func main() {
 
 	issues, _, err := client.Issues.ListByRepo(ctx, repo[0], repo[1], IssueListByRepoOption)
 	if err != nil {
-		gha.Error(fmt.Sprint(err), ghaLogOption)
-		os.Exit(1)
+		a.Fatalf("%v", err)
 	}
-	gha.Debug(fmt.Sprintf("%d issues", len(issues)), ghaLogOption)
+	a.Debugf("%d issues", len(issues))
 
 	var createdIssues []*github.IssueRequest
 
 	// Iterate
 	for _, item := range feed.Items {
-		title := strings.Join([]string{gha.GetInput("prefix"), item.Title}, " ")
-		gha.Debug(fmt.Sprintf("Issue '%s'", title), ghaLogOption)
+		title := strings.Join([]string{a.GetInput(prefixInput), item.Title}, " ")
+		a.Debugf("Issue '%s'", title)
 
 		if issue := funk.Find(issues, func(x *github.Issue) bool {
 			return *x.Title == title
 		}); issue != nil {
-			gha.Warning("Issue already exists", ghaLogOption)
+			a.Warningf("Issue already exists")
 			continue
 		}
 
@@ -107,16 +117,16 @@ func main() {
 
 		markdown, err := converter.ConvertString(content)
 		if err != nil {
-			gha.Error(fmt.Sprintf("Fail to convert HTML to markdown: '%s'", err), ghaLogOption)
+			a.Errorf("Fail to convert HTML to markdown: '%s'", err)
 			continue
 		}
 
 		// truncate if characterLimit >0
-		characterLimit := gha.GetInput("characterLimit")
+		characterLimit := a.GetInput("characterLimit")
 		if characterLimit != "" {
 			cl, err := strconv.Atoi(characterLimit)
 			if err != nil {
-				gha.Error(fmt.Sprintf("fail to convert 'characterLimit': '%s'", err), ghaLogOption)
+				a.Errorf("fail to convert 'characterLimit': '%s'", err)
 				continue
 			}
 			if len(markdown) > cl {
@@ -142,7 +152,7 @@ func main() {
 `
 		var tpl bytes.Buffer
 		if err := template.Must(template.New("issue").Parse(issue)).Execute(&tpl, context); err != nil {
-			gha.Warning(fmt.Sprintf("Cannot render issue: '%s'", err), ghaLogOption)
+			a.Warningf("Cannot render issue: '%s'", err)
 			continue
 		}
 
@@ -150,7 +160,7 @@ func main() {
 
 		// Default to creating an issue per item
 		// Create first issue if aggregate
-		if aggregate, err := strconv.ParseBool(gha.GetInput("aggregate")); err != nil || !aggregate || len(createdIssues) == 0 {
+		if aggregate, err := strconv.ParseBool(a.GetInput(aggregateInput)); err != nil || !aggregate || len(createdIssues) == 0 {
 			// Create Issue
 
 			issueRequest := &github.IssueRequest{
@@ -160,26 +170,25 @@ func main() {
 			}
 			createdIssues = append(createdIssues, issueRequest)
 		} else {
-			title = strings.Join([]string{gha.GetInput("prefix"), time.Now().Format(time.RFC822)}, " ")
+			title = strings.Join([]string{a.GetInput(prefixInput), time.Now().Format(time.RFC822)}, " ")
 			createdIssues[0].Title = &title
 
 			body = fmt.Sprintf("%s\n\n%s", *createdIssues[0].Body, body)
 			createdIssues[0].Body = &body
 		}
-
 	}
 
 	for _, issueRequest := range createdIssues {
-		if dr, err := strconv.ParseBool(gha.GetInput("dry-run")); err != nil || !dr {
+		if dr, err := strconv.ParseBool(a.GetInput(dryRunInput)); err != nil || !dr {
 
 			_, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
 			if err != nil {
-				gha.Warning(fmt.Sprintf("Fail create issue %s: %s", *issueRequest.Title, err), ghaLogOption)
+				a.Warningf("Fail create issue %s: %s", *issueRequest.Title, err)
 				continue
 			}
 
 		} else {
-			gha.Debug(fmt.Sprintf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body), ghaLogOption)
+			a.Debugf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body)
 		}
 	}
 
