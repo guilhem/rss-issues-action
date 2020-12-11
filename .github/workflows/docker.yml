@@ -22,7 +22,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2
