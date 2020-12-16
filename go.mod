@@ -16,9 +16,9 @@ require (
 	github.com/sethvargo/go-githubactions v0.3.0
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/thoas/go-funk v0.7.0
-	github.com/yuin/goldmark v1.2.1 // indirect
+	github.com/yuin/goldmark v1.3.0 // indirect
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
-	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
+	golang.org/x/net v0.0.0-20201216054612-986b41b23924 // indirect
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	golang.org/x/text v0.3.4 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -29,4 +29,4 @@ require (
 
 replace github.com/mmcdole/gofeed => github.com/guilhem/gofeed v1.0.1-0.20200518231152-db85dfc4ee46
 
-replace github.com/sethvargo/go-githubactions => github.com/guilhem/go-githubactions v0.3.1-0.20201211173814-6eceb9b50fac
+replace github.com/sethvargo/go-githubactions => github.com/guilhem/go-githubactions v0.3.1-0.20201216155035-f8dcbf51d562
