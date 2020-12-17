@@ -24,7 +24,8 @@ RUN go build \
 
 FROM gcr.io/distroless/base
 
-USER nobody:nobody
+# Error when writing in Environment Files
+#USER nobody:nobody
 
 COPY --from=build-env /bin/app /
 

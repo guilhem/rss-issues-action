@@ -120,8 +120,6 @@ github.com/google/pprof v0.0.0-20200708004538-1a94d8640e99/go.mod h1:ZgVRPoUq/hf
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
-github.com/guilhem/go-githubactions v0.3.1-0.20201217084449-e5a6aaabdaa7 h1:1DKIsdFr3u71l2ccXTbOClv7kRlvEsztA/OgFFp7CX0=
-github.com/guilhem/go-githubactions v0.3.1-0.20201217084449-e5a6aaabdaa7/go.mod h1:ugCoIFQjs7HxIwwYiY7ty6H9T+7Z4ey481HxqA3VRKE=
 github.com/guilhem/go-githubactions v0.3.1-0.20201217085855-6a1792838279 h1:mXTnhU8oylG2e+9DfqYM7UxdSQgZPtIRzdWYfBh2qEc=
 github.com/guilhem/go-githubactions v0.3.1-0.20201217085855-6a1792838279/go.mod h1:ugCoIFQjs7HxIwwYiY7ty6H9T+7Z4ey481HxqA3VRKE=
 github.com/guilhem/gofeed v1.0.1-0.20200518231152-db85dfc4ee46 h1:efRwt6EKZG/vbdqiwxS9P17UHaCeKnMmjFHDdABkx0o=
