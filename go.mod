@@ -29,4 +29,4 @@ require (
 
 replace github.com/mmcdole/gofeed => github.com/guilhem/gofeed v1.0.1-0.20200518231152-db85dfc4ee46
 
-replace github.com/sethvargo/go-githubactions => github.com/guilhem/go-githubactions v0.3.1-0.20201216155035-f8dcbf51d562
+replace github.com/sethvargo/go-githubactions => github.com/guilhem/go-githubactions v0.3.1-0.20201217084449-e5a6aaabdaa7
