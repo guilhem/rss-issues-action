@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"regexp"
 
 	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
@@ -30,6 +31,8 @@ const (
 	prefixInput    = "prefix"
 	aggregateInput = "aggragate"
 	dryRunInput    = "dry-run"
+	titleFilterInput    = "titleFilter"
+	contentFilterInput    = "contentFilter"
 )
 
 func main() {
@@ -113,6 +116,24 @@ func main() {
 		content := item.Content
 		if content == "" {
 			content = item.Description
+		}
+
+
+		filter := a.GetInput(titleFilterInput)
+		if filter !="" {
+			matched, _ := regexp.MatchString(filter, item.Title)
+			if matched {
+				a.Debugf("No issue created due to title filter")
+				continue
+			}
+		}
+		filter = a.GetInput(contentFilterInput)
+		if filter !="" {
+			matched, _ := regexp.MatchString(filter, content)
+			if matched {
+				a.Debugf("No issue created due to content filter")
+				continue
+			}
 		}
 
 		markdown, err := converter.ConvertString(content)
