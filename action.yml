@@ -21,6 +21,10 @@ inputs:
     description: "Aggregate all items in a single issue"
   characterLimit:
     description: "Limit size of issue content"
+  titleFilter:
+    description: "Filter out entries whose titles match this regex"
+  contentFilter:
+    description: "Filter out entries whose contents match this regex"
 outputs:
   issues:
     description: "issues id, comma separated"
