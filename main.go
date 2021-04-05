@@ -45,7 +45,7 @@ const (
 	repoTokenInput     = "repo-token"
 	feedInput          = "feed"
 	prefixInput        = "prefix"
-	aggregateInput     = "aggragate"
+	aggregateInput     = "aggregate"
 	dryRunInput        = "dry-run"
 	titleFilterInput   = "titleFilter"
 	contentFilterInput = "contentFilter"
