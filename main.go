@@ -5,11 +5,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
-	"regexp"
 
 	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
@@ -24,15 +24,15 @@ import (
 )
 
 const (
-	lastTimeInput  = "lastTime"
-	labelsInput    = "labels"
-	repoTokenInput = "repo-token"
-	feedInput      = "feed"
-	prefixInput    = "prefix"
-	aggregateInput = "aggragate"
-	dryRunInput    = "dry-run"
-	titleFilterInput    = "titleFilter"
-	contentFilterInput    = "contentFilter"
+	lastTimeInput      = "lastTime"
+	labelsInput        = "labels"
+	repoTokenInput     = "repo-token"
+	feedInput          = "feed"
+	prefixInput        = "prefix"
+	aggregateInput     = "aggregate"
+	dryRunInput        = "dry-run"
+	titleFilterInput   = "titleFilter"
+	contentFilterInput = "contentFilter"
 )
 
 func main() {
@@ -118,9 +118,8 @@ func main() {
 			content = item.Description
 		}
 
-
 		filter := a.GetInput(titleFilterInput)
-		if filter !="" {
+		if filter != "" {
 			matched, _ := regexp.MatchString(filter, item.Title)
 			if matched {
 				a.Debugf("No issue created due to title filter")
@@ -128,7 +127,7 @@ func main() {
 			}
 		}
 		filter = a.GetInput(contentFilterInput)
-		if filter !="" {
+		if filter != "" {
 			matched, _ := regexp.MatchString(filter, content)
 			if matched {
 				a.Debugf("No issue created due to content filter")
