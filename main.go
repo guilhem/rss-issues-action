@@ -11,16 +11,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/google/go-github/v33/github"
-	"golang.org/x/oauth2"
-
-	funk "github.com/thoas/go-funk"
-
-	"github.com/mmcdole/gofeed"
-
-	gha "github.com/sethvargo/go-githubactions"
-
 	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/google/go-github/v34/github"
+	"github.com/mmcdole/gofeed"
+	gha "github.com/sethvargo/go-githubactions"
+	funk "github.com/thoas/go-funk"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -44,15 +40,18 @@ func main() {
 
 	// Parse limit time option
 	var limitTime time.Time
+
 	if d, err := time.ParseDuration(a.GetInput(lastTimeInput)); err == nil {
 		// Make duration negative
 		if d > 0 {
 			d = -d
 		}
+
 		limitTime = time.Now().Add(d)
 	} else {
 		a.Debugf("Fail to parse last time %s", a.GetInput(lastTimeInput))
 	}
+
 	a.Debugf("limitTime %s", limitTime)
 
 	// Parse Labels
@@ -61,23 +60,25 @@ func main() {
 
 	ctx := context.Background()
 
-	// Instanciate GitHub client
+	// Instantiate GitHub client
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: a.GetInput(repoTokenInput)},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	// Instanciate feed parser
+	// Instantiate feed parser
 	fp := gofeed.NewParser()
+
 	feed, err := fp.ParseURLWithContext(a.GetInput(feedInput), ctx)
 	if err != nil {
 		a.Errorf("Cannot parse feed '%s': '%s'", a.GetInput(feedInput), err)
 		os.Exit(1)
 	}
+
 	a.Infof("%s", feed.Title)
 
-	// Instanciate HTML to markdown
+	// Instantiate HTML to markdown
 	converter := md.NewConverter("", true, nil)
 
 	// Remove old items in feed
@@ -95,6 +96,7 @@ func main() {
 	if err != nil {
 		a.Fatalf("%v", err)
 	}
+
 	a.Debugf("%d issues", len(issues))
 
 	var createdIssues []*github.IssueRequest
@@ -108,6 +110,7 @@ func main() {
 			return *x.Title == title
 		}); issue != nil {
 			a.Warningf("Issue already exists")
+
 			continue
 		}
 
@@ -123,14 +126,18 @@ func main() {
 			matched, _ := regexp.MatchString(filter, item.Title)
 			if matched {
 				a.Debugf("No issue created due to title filter")
+
 				continue
 			}
 		}
+
 		filter = a.GetInput(contentFilterInput)
+
 		if filter != "" {
 			matched, _ := regexp.MatchString(filter, content)
 			if matched {
 				a.Debugf("No issue created due to content filter")
+
 				continue
 			}
 		}
@@ -138,6 +145,7 @@ func main() {
 		markdown, err := converter.ConvertString(content)
 		if err != nil {
 			a.Errorf("Fail to convert HTML to markdown: '%s'", err)
+
 			continue
 		}
 
@@ -147,8 +155,10 @@ func main() {
 			cl, err := strconv.Atoi(characterLimit)
 			if err != nil {
 				a.Errorf("fail to convert 'characterLimit': '%s'", err)
+
 				continue
 			}
+
 			if len(markdown) > cl {
 				markdown = markdown[:cl] + "…"
 				markdown += "\n\n---\n## Would you like to know more?\nRead the full article on the following website:"
@@ -170,9 +180,12 @@ func main() {
 <{{ .Link }}>
 {{end}}
 `
+
 		var tpl bytes.Buffer
+
 		if err := template.Must(template.New("issue").Parse(issue)).Execute(&tpl, context); err != nil {
 			a.Warningf("Cannot render issue: '%s'", err)
+
 			continue
 		}
 
@@ -182,7 +195,6 @@ func main() {
 		// Create first issue if aggregate
 		if aggregate, err := strconv.ParseBool(a.GetInput(aggregateInput)); err != nil || !aggregate || len(createdIssues) == 0 {
 			// Create Issue
-
 			issueRequest := &github.IssueRequest{
 				Title:  &title,
 				Body:   &body,
@@ -200,13 +212,12 @@ func main() {
 
 	for _, issueRequest := range createdIssues {
 		if dr, err := strconv.ParseBool(a.GetInput(dryRunInput)); err != nil || !dr {
-
 			_, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
 			if err != nil {
 				a.Warningf("Fail create issue %s: %s", *issueRequest.Title, err)
+
 				continue
 			}
-
 		} else {
 			a.Debugf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body)
 		}
