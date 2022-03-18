@@ -7,24 +7,35 @@ branding:
 inputs:
   repo-token:
     description: "The GITHUB_TOKEN secret"
+    required: true
   feed:
     description: "URL of the rss"
+    required: true
   prefix:
     description: "Prefix added to issues"
+    required: false
   lastTime:
     description: "limit RSS items to this time"
+    required: false
+    default: "720h" # 30 days
   labels:
     description: "Labels to add, comma separated"
+    required: false
   dry-run:
     description: "Log issue creation but do nothing"
+    required: false
   aggregate:
     description: "Aggregate all items in a single issue"
+    required: false
   characterLimit:
     description: "Limit size of issue content"
+    required: false
   titleFilter:
     description: "Filter out entries whose titles match this regex"
+    required: false
   contentFilter:
     description: "Filter out entries whose contents match this regex"
+    required: false
 outputs:
   issues:
     description: "issues id, comma separated"
