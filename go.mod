@@ -10,10 +10,10 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/go-github/v33 v33.0.0
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mmcdole/gofeed v1.1.0
+	github.com/mmcdole/gofeed v1.1.3
 	github.com/mmcdole/goxpp v0.0.0-20200921145534-2f3784f67354 // indirect
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
-	github.com/sethvargo/go-githubactions v0.3.0
+	github.com/sethvargo/go-githubactions v0.5.3
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/thoas/go-funk v0.7.0
 	github.com/yuin/goldmark v1.3.0 // indirect
@@ -26,7 +26,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
-
-replace github.com/mmcdole/gofeed => github.com/guilhem/gofeed v1.0.1-0.20200518231152-db85dfc4ee46
-
-replace github.com/sethvargo/go-githubactions => github.com/guilhem/go-githubactions v0.3.1-0.20201217085855-6a1792838279
