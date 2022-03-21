@@ -200,9 +200,11 @@ func main() {
 			// Create Issue
 
 			issueRequest := &github.IssueRequest{
-				Title:  &title,
-				Body:   &body,
-				Labels: &labels,
+				Title: &title,
+				Body:  &body,
+			}
+			if len(labels) != 0 {
+				issueRequest.Labels = &labels
 			}
 			createdIssues = append(createdIssues, issueRequest)
 		} else {
