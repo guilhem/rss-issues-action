@@ -27,6 +27,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/akrennmair/slice"
 	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
 
@@ -113,7 +114,8 @@ func main() {
 	}
 	a.Debugf("%d issues", len(issues))
 
-	var createdIssues []*github.IssueRequest
+	var issuesToCreate []*github.IssueRequest
+	var createdIssues []*github.Issue
 
 	// Iterate
 	for _, item := range feed.Items {
@@ -196,7 +198,7 @@ func main() {
 
 		// Default to creating an issue per item
 		// Create first issue if aggregate
-		if aggregate, err := strconv.ParseBool(a.GetInput(aggregateInput)); err != nil || !aggregate || len(createdIssues) == 0 {
+		if aggregate, err := strconv.ParseBool(a.GetInput(aggregateInput)); err != nil || !aggregate || len(issuesToCreate) == 0 {
 			// Create Issue
 
 			issueRequest := &github.IssueRequest{
@@ -206,29 +208,32 @@ func main() {
 			if len(labels) != 0 {
 				issueRequest.Labels = &labels
 			}
-			createdIssues = append(createdIssues, issueRequest)
+			issuesToCreate = append(issuesToCreate, issueRequest)
 		} else {
 			title = strings.Join([]string{a.GetInput(prefixInput), time.Now().Format(time.RFC822)}, " ")
-			createdIssues[0].Title = &title
+			issuesToCreate[0].Title = &title
 
-			body = fmt.Sprintf("%s\n\n%s", *createdIssues[0].Body, body)
-			createdIssues[0].Body = &body
+			body = fmt.Sprintf("%s\n\n%s", *issuesToCreate[0].Body, body)
+			issuesToCreate[0].Body = &body
 		}
 	}
 
-	for _, issueRequest := range createdIssues {
+	for _, issueRequest := range issuesToCreate {
 		if dr, err := strconv.ParseBool(a.GetInput(dryRunInput)); err != nil || !dr {
 
-			_, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
+			issue, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
 			if err != nil {
 				a.Warningf("Fail create issue %s: %s", *issueRequest.Title, err)
 				continue
 			}
+			createdIssues = append(createdIssues, issue)
 
 		} else {
 			a.Debugf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body)
 		}
 	}
 
-	// gha.SetOutput("issues", strings.Join(createdIssues, ","))
+	createdIssuesString := slice.Map(createdIssues, func(ci *github.Issue) string { return strconv.Itoa(*ci.Number) })
+
+	gha.SetOutput("issues", strings.Join(createdIssuesString, ","))
 }
