@@ -48,7 +48,7 @@ Don't create an issue if the content matches the specified regular expression ([
 
 ### `issues`
 
-Issues id, comma separated.
+Issues number, comma separated.
 
 ## Example
 
