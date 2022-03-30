@@ -24,9 +24,6 @@ RUN go build \
 
 FROM gcr.io/distroless/static
 
-# Error when writing in Environment Files
-#USER nobody:nobody
-
 COPY --from=build-env /bin/app /
 
 ENTRYPOINT ["/app"]
