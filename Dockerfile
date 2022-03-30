@@ -15,7 +15,6 @@ COPY . .
 RUN go build \
   -a \
   -ldflags "-s -w -extldflags '-static'" \
-  -installsuffix cgo \
   -tags netgo \
   -o /bin/app \
   . \
