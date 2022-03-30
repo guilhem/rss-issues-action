@@ -22,7 +22,7 @@ RUN go build \
   && strip /bin/app \
   && upx -q -9 /bin/app
 
-FROM gcr.io/distroless/base
+FROM gcr.io/distroless/static
 
 # Error when writing in Environment Files
 #USER nobody:nobody
