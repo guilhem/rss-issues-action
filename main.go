@@ -99,7 +99,11 @@ func main() {
 
 	// Remove old items in feed
 	feed.Items = funk.Filter(feed.Items, func(x *gofeed.Item) bool {
-		return x.PublishedParsed.After(limitTime)
+		if x.PublishedParsed != nil {
+			return x.PublishedParsed.After(limitTime)
+		}
+		a.Infof("Item don't have a publish date, skip limitTime")
+		return true
 	}).([]*gofeed.Item)
 
 	// Get all issues
