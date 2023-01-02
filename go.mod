@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v33 v33.0.0
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/sethvargo/go-githubactions v1.0.0
-	github.com/thoas/go-funk v0.9.2
+	github.com/thoas/go-funk v0.9.3
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 )
 
