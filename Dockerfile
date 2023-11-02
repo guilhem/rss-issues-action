@@ -15,17 +15,13 @@ COPY . .
 RUN go build \
   -a \
   -ldflags "-s -w -extldflags '-static'" \
-  -installsuffix cgo \
   -tags netgo \
   -o /bin/app \
   . \
   && strip /bin/app \
   && upx -q -9 /bin/app
 
-FROM gcr.io/distroless/base
-
-# Error when writing in Environment Files
-#USER nobody:nobody
+FROM gcr.io/distroless/static
 
 COPY --from=build-env /bin/app /
 
