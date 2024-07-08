@@ -1,4 +1,4 @@
-FROM golang:1.18 as build-env
+FROM golang:1.21-alpine AS build-env
 
 
 ENV GO111MODULE=on \
@@ -6,8 +6,9 @@ ENV GO111MODULE=on \
   GOOS=linux \
   GOARCH=amd64
 
-RUN apt-get -qq update && \
-  apt-get -yqq install upx
+# Install upx
+RUN apk add --no-cache upx
+RUN apk add --no-cache binutils
 
 WORKDIR /src
 COPY . .
