@@ -1,31 +1,17 @@
-FROM golang:1.18 as build-env
+FROM golang:1.27.1 AS build-env
 
-
-ENV GO111MODULE=on \
-  CGO_ENABLED=0 \
-  GOOS=linux \
-  GOARCH=amd64
-
-RUN apt-get -qq update && \
-  apt-get -yqq install upx
+ENV CGO_ENABLED=0
 
 WORKDIR /src
-COPY . .
+COPY go.mod go.sum ./
+RUN go mod download
+COPY *.go ./
+RUN go build -trimpath -ldflags="-s -w" -o /bin/app .
 
-RUN go build \
-  -a \
-  -ldflags "-s -w -extldflags '-static'" \
-  -installsuffix cgo \
-  -tags netgo \
-  -o /bin/app \
-  . \
-  && strip /bin/app \
-  && upx -q -9 /bin/app
+FROM gcr.io/distroless/static-debian13
 
-FROM gcr.io/distroless/base
-
-# Error when writing in Environment Files
-#USER nobody:nobody
+# GitHub mounts environment files owned by the runner; the action must write them.
+USER 0:0
 
 COPY --from=build-env /bin/app /
 
