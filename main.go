@@ -28,8 +28,7 @@ import (
 	"time"
 
 	"github.com/akrennmair/slice"
-	"github.com/google/go-github/v33/github"
-	"golang.org/x/oauth2"
+	"github.com/google/go-github/v92/github"
 
 	funk "github.com/thoas/go-funk"
 
@@ -54,7 +53,6 @@ const (
 
 func main() {
 	a := gha.New()
-	a.AddPath("main.go")
 
 	// Parse repository in form owner/name
 	repo := strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
@@ -79,11 +77,10 @@ func main() {
 	ctx := context.Background()
 
 	// Instanciate GitHub client
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: a.GetInput(repoTokenInput)},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client, err := github.NewClient(github.WithAuthToken(a.GetInput(repoTokenInput)))
+	if err != nil {
+		a.Fatalf("Cannot initialize GitHub client: %v", err)
+	}
 
 	// Instanciate feed parser
 	fp := gofeed.NewParser()
@@ -118,7 +115,7 @@ func main() {
 	}
 	a.Debugf("%d issues", len(issues))
 
-	var issuesToCreate []*github.IssueRequest
+	var issuesToCreate []*github.CreateIssueRequest
 	var createdIssues []*github.Issue
 
 	// Iterate
@@ -205,17 +202,17 @@ func main() {
 		if aggregate, err := strconv.ParseBool(a.GetInput(aggregateInput)); err != nil || !aggregate || len(issuesToCreate) == 0 {
 			// Create Issue
 
-			issueRequest := &github.IssueRequest{
-				Title: &title,
+			issueRequest := &github.CreateIssueRequest{
+				Title: title,
 				Body:  &body,
 			}
 			if len(labels) != 0 {
-				issueRequest.Labels = &labels
+				issueRequest.Labels = labels
 			}
 			issuesToCreate = append(issuesToCreate, issueRequest)
 		} else {
 			title = strings.Join([]string{a.GetInput(prefixInput), time.Now().Format(time.RFC822)}, " ")
-			issuesToCreate[0].Title = &title
+			issuesToCreate[0].Title = title
 
 			body = fmt.Sprintf("%s\n\n%s", *issuesToCreate[0].Body, body)
 			issuesToCreate[0].Body = &body
@@ -225,15 +222,15 @@ func main() {
 	for _, issueRequest := range issuesToCreate {
 		if dr, err := strconv.ParseBool(a.GetInput(dryRunInput)); err != nil || !dr {
 
-			issue, _, err := client.Issues.Create(ctx, repo[0], repo[1], issueRequest)
+			issue, _, err := client.Issues.Create(ctx, repo[0], repo[1], *issueRequest)
 			if err != nil {
-				a.Warningf("Fail create issue %s: %s", *issueRequest.Title, err)
+				a.Warningf("Fail create issue %s: %s", issueRequest.Title, err)
 				continue
 			}
 			createdIssues = append(createdIssues, issue)
 
 		} else {
-			a.Debugf("Creating Issue '%s' with content '%s'", *issueRequest.Title, *issueRequest.Body)
+			a.Debugf("Creating Issue '%s' with content '%s'", issueRequest.Title, *issueRequest.Body)
 		}
 	}
 
